@@ -30,16 +30,17 @@ from typing import Protocol
 class UseCase(Protocol):
     """
     Base protocol for all use cases in the application.
-    
+
     The UseCase protocol establishes a consistent interface for executing business
     operations. This allows use cases to be:
     - Called uniformly via execute()
     - Composed and chained together
     - Wrapped with cross-cutting concerns (logging, monitoring, transactions)
-    
+
     The __call__ method provides syntactic sugar, allowing use cases to be invoked
     like functions: use_case() instead of use_case.execute()
     """
+
     def execute(self) -> None: ...
 
     def __call__(self) -> None:
@@ -49,11 +50,11 @@ class UseCase(Protocol):
 class DownloadAndStore(UseCase):
     """
     Use case for downloading data from an API, parsing it, and storing the result.
-    
+
     This use case demonstrates Clean Architecture's Dependency Inversion Principle:
     it depends on abstractions (ApiClass, Parser, Storage protocols) rather than
     concrete implementations. This provides several key benefits:
-    
+
     Benefits:
     ---------
     1. **Swappable Components**: Change from FrameService to GraphQLService without
@@ -64,14 +65,14 @@ class DownloadAndStore(UseCase):
        without touching this use case
     4. **Testability**: Mock each dependency independently for isolated testing
     5. **Stability**: This use case should never change due to external system changes
-    
+
     Why This Matters:
     ----------------
     If we tightly coupled this class to specific implementations (e.g., directly
     importing GraphQLService), every change to the API or storage system would
     require modifying this business logic. With dependency injection via protocols,
     the business logic remains stable and protected from external changes.
-    
+
     Parameters:
     -----------
     context : Context
@@ -82,7 +83,7 @@ class DownloadAndStore(UseCase):
         Protocol implementation for transforming downloaded data
     storage : Storage
         Protocol implementation for persisting parsed data
-    
+
     Example:
     --------
     >>> download_and_store = DownloadAndStore(
@@ -93,6 +94,7 @@ class DownloadAndStore(UseCase):
     ... )
     >>> download_and_store.execute()  # Orchestrates the complete flow
     """
+
     def __init__(
         self,
         context: Context,

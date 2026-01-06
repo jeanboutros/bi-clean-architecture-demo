@@ -20,14 +20,14 @@ Benefits:
 
 Why Entities Exist:
 ------------------
-APIs return raw dictionaries or raw data structures. Passing those data structures directly 
-through the system creates tight coupling between the API response format and core logic. 
-Domain entities decouple the internal representation from external data sources, allowing 
+APIs return raw dictionaries or raw data structures. Passing those data structures directly
+through the system creates tight coupling between the API response format and core logic.
+Domain entities decouple the internal representation from external data sources, allowing
 the system to evolve independently.
 
 Example:
 --------
-If the API changes field names from 'id' to 'identifier', only the adapter layer needs to 
+If the API changes field names from 'id' to 'identifier', only the adapter layer needs to
 change. The domain model remains stable, protecting all business logic from this change.
 
 """
@@ -39,16 +39,17 @@ from dataclasses import dataclass
 class Frame:
     """
     Domain entity representing a Frame in our business model.
-    
+
     This entity is immutable (frozen=True) to ensure data integrity and uses slots=True
     for memory efficiency. It represents the core concept independent of how frames are
     stored, retrieved, or transmitted.
-    
+
     Attributes:
         id: Unique identifier for the frame
         name: Human-readable name of the frame
         location: Optional geographical location information
     """
+
     id: str
     name: str
     location: str | None

@@ -50,7 +50,7 @@ class Command(Protocol):
     """
 
     def execute(self, *args: Any, **kwds: Any) -> Any: ...
-    
+
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Convenience method to invoke command via () syntax."""
         return self.execute(*args, **kwds)
@@ -189,7 +189,7 @@ class SaveToFile(Command):
         # Write the data to the file
         with file_path.open("wb") as f:
             f.write(d)
-        
+
         print("Data written into file: ", file_path)
 
 

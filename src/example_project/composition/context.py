@@ -26,11 +26,11 @@ import importlib
 class ClassImportPath(NamedTuple):
     """
     String-based class import specification enabling dynamic dependency loading.
-    
+
     This class enables the dependency injection pattern by allowing dependencies to be
     specified as strings (module path + class name) rather than direct imports. This
     provides several key benefits:
-    
+
     Benefits:
     ---------
     1. **Configuration-Driven**: Change implementations via configuration files
@@ -38,26 +38,26 @@ class ClassImportPath(NamedTuple):
     3. **Circular Import Prevention**: Break circular dependencies
     4. **Plugin Architecture**: Load implementations discovered at runtime
     5. **Environment-Specific Loading**: Different classes for dev/test/prod
-    
+
     Why Not Direct Imports:
     -----------------------
     Direct imports create tight coupling:
         from example_project.interface.graphql_service import GraphQLService
-        
+
     With ClassImportPath, we can change implementations via configuration:
         frames_class = ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
         # Change to: "example_project.interface.frame_service.FrameService"
-    
+
     This allows switching implementations without code changes, supporting:
     - A/B testing different implementations
     - Environment-specific implementations
     - Feature flags
     - Plugin systems
-    
+
     Attributes:
         module_name: Python module path (e.g., 'example_project.interface.graphql_service')
         class_name: Class name within the module (e.g., 'GraphQLService')
-    
+
     Example Usage:
     --------------
     >>> path = ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
@@ -77,15 +77,15 @@ class ClassImportPath(NamedTuple):
     def from_string(cls, fully_qualified_module_name: str):
         """
         Parse fully qualified class name into ClassImportPath.
-        
+
         Splits string like "module.path.ClassName" into module_name and class_name.
-        
+
         Parameters:
             fully_qualified_module_name: Dot-separated module path with class name
-        
+
         Returns:
             ClassImportPath: Parsed import path specification
-        
+
         Example:
             >>> ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
             ClassImportPath(module_name='example_project.interface.graphql_service', class_name='GraphQLService')
@@ -104,12 +104,12 @@ class ClassImportPath(NamedTuple):
     def import_class(self):
         """
         Dynamically import and return the class.
-        
+
         Uses importlib to import the module and getattr to retrieve the class.
-        
+
         Returns:
             type: The imported class (not an instance)
-        
+
         Raises:
             ModuleNotFoundError: If module doesn't exist
             AttributeError: If class doesn't exist in module
@@ -126,17 +126,17 @@ class ClassImportPath(NamedTuple):
 class Context(NamedTuple):
     """
     Application configuration container specifying dependency implementations.
-    
+
     Context is the heart of dependency injection in this application. It specifies
     which concrete implementations to use for each protocol, enabling the application
     to run with different configurations for different environments.
-    
+
     Configuration Pattern:
     ----------------------
     Rather than hard-coding implementations throughout the application, all dependency
     decisions are centralised in Context. The composition layer reads the Context and
     wires dependencies accordingly.
-    
+
     Benefits:
     ---------
     1. **Environment-Specific Configuration**: Different implementations for dev/test/prod
@@ -144,25 +144,25 @@ class Context(NamedTuple):
     3. **Feature Flags**: Enable/disable features via context
     4. **Testability**: Test contexts with mock implementations
     5. **Documentation**: Context serves as documentation of all dependencies
-    
+
     Context Methods:
     ----------------
     - default(): Standard configuration for local development
     - notebook_default(): Configuration for Databricks notebooks
     - test(): Configuration with test doubles (could be added)
     - production(): Configuration for production environment (could be added)
-    
+
     Clean Architecture Benefit:
     ---------------------------
     Context enables the Dependency Inversion Principle. Instead of:
         use_case = DownloadAndStore(GraphQLService(), AsIsParser(), StorageService())
-    
+
     We have:
         context = Context.default()
         # Composition layer wires dependencies based on context
-    
+
     This allows changing implementations without modifying use case instantiation code.
-    
+
     Attributes:
     -----------
     environment : str
@@ -175,16 +175,17 @@ class Context(NamedTuple):
         Parser implementation to use
     storage_class : ClassImportPath
         Storage backend implementation to use
-    
+
     Example Usage:
     --------------
     >>> context = Context.default()
     >>> print(context.environment)  # 'dev'
     >>> api_class = context.frames_class.import_class()  # Get GraphQLService class
     """
+
     environment: str
     project_package_name: str
-    
+
     frames_class: ClassImportPath
     frames_parser_class: ClassImportPath
     storage_class: ClassImportPath
@@ -210,12 +211,12 @@ class Context(NamedTuple):
     def default(cls):
         """
         Create default context for local development.
-        
+
         This configuration uses:
         - GraphQLService for API calls
         - AsIsParser for pass-through parsing
         - StorageService for local filesystem storage
-        
+
         Returns:
             Context: Configuration for local development environment
         """
@@ -232,19 +233,18 @@ class Context(NamedTuple):
             storage_class=ClassImportPath.from_string(
                 # "example_project.storage.UnityCatalogVolumeStorageService"
                 "example_project.adapter.storage.StorageService"
-
             ),
         )
-    
+
     @classmethod
     def notebook_default(cls):
         """
         Create context for Databricks notebook environment.
-        
+
         This configuration is optimised for running in Databricks notebooks.
         Currently uses same implementations as default(), but provides flexibility
         to use notebook-specific implementations (e.g., Unity Catalog storage).
-        
+
         Returns:
             Context: Configuration for Databricks notebook environment
         """
@@ -261,6 +261,5 @@ class Context(NamedTuple):
             storage_class=ClassImportPath.from_string(
                 # "example_project.storage.UnityCatalogVolumeStorageService"
                 "example_project.adapter.storage.StorageService"
-
             ),
         )
