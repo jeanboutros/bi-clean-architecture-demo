@@ -20,7 +20,8 @@ if project_path not in sys.path:
 
 print("Current path:", current_path)
 print("Project path:", project_path)
-print("sys.path:", '\n'.join(sys.path))
+print("sys.path:", '
+'.join(sys.path))
 
 # COMMAND ----------
 

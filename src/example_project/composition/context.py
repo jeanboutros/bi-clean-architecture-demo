@@ -1,4 +1,71 @@
-"""\nApplication Context and Configuration\n\nThis module provides configuration management and dynamic class loading for dependency\ninjection. It demonstrates Clean Architecture's flexibility by allowing different\nimplementations to be wired based on configuration.\n\nKey Concepts:\n-------------\n1. **ClassImportPath**: String-based dynamic class loading\n2. **Context**: Configuration container specifying which implementations to use\n3. **Environment-Specific Configuration**: Different contexts for dev, test, production\n\nBenefits:\n---------\n- **Flexibility**: Change implementations without code changes\n- **Testability**: Different contexts for testing vs. production\n- **Deployment**: Environment-specific configurations\n- **Experimentation**: Easy to A/B test different implementations\n\"\""\n\nfrom typing import NamedTuple\nimport importlib\n\n\nclass ClassImportPath(NamedTuple):\n    \"\"\"\n    String-based class import specification enabling dynamic dependency loading.\n    \n    This class enables the dependency injection pattern by allowing dependencies to be\n    specified as strings (module path + class name) rather than direct imports. This\n    provides several key benefits:\n    \n    Benefits:\n    ---------\n    1. **Configuration-Driven**: Change implementations via configuration files\n    2. **Lazy Loading**: Import classes only when needed\n    3. **Circular Import Prevention**: Break circular dependencies\n    4. **Plugin Architecture**: Load implementations discovered at runtime\n    5. **Environment-Specific Loading**: Different classes for dev/test/prod\n    \n    Why Not Direct Imports:\n    -----------------------\n    Direct imports create tight coupling:\n        from example_project.interface.graphql_service import GraphQLService\n        \n    With ClassImportPath, we can change implementations via configuration:\n        frames_class = ClassImportPath.from_string(\"example_project.interface.graphql_service.GraphQLService\")\n        # Change to: \"example_project.interface.frame_service.FrameService\"\n    \n    This allows switching implementations without code changes, supporting:\n    - A/B testing different implementations\n    - Environment-specific implementations\n    - Feature flags\n    - Plugin systems\n    \n    Attributes:\n        module_name: Python module path (e.g., 'example_project.interface.graphql_service')\n        class_name: Class name within the module (e.g., 'GraphQLService')\n    \n    Example Usage:\n    --------------\n    >>> path = ClassImportPath.from_string(\"example_project.interface.graphql_service.GraphQLService\")\n    >>> service_class = path.import_class()  # Returns GraphQLService class\n    >>> service_instance = service_class()  # Create instance\n    >>> # Or use __call__ shorthand:\n    >>> service_class = path()  # Same as import_class()\n    \"\"\"
+"""
+Application Context and Configuration
+
+This module provides configuration management and dynamic class loading for dependency
+injection. It demonstrates Clean Architecture's flexibility by allowing different
+implementations to be wired based on configuration.
+
+Key Concepts:
+-------------
+1. **ClassImportPath**: String-based dynamic class loading
+2. **Context**: Configuration container specifying which implementations to use
+3. **Environment-Specific Configuration**: Different contexts for dev, test, production
+
+Benefits:
+---------
+- **Flexibility**: Change implementations without code changes
+- **Testability**: Different contexts for testing vs. production
+- **Deployment**: Environment-specific configurations
+- **Experimentation**: Easy to A/B test different implementations
+"""
+
+from typing import NamedTuple
+import importlib
+
+
+class ClassImportPath(NamedTuple):
+    """
+    String-based class import specification enabling dynamic dependency loading.
+    
+    This class enables the dependency injection pattern by allowing dependencies to be
+    specified as strings (module path + class name) rather than direct imports. This
+    provides several key benefits:
+    
+    Benefits:
+    ---------
+    1. **Configuration-Driven**: Change implementations via configuration files
+    2. **Lazy Loading**: Import classes only when needed
+    3. **Circular Import Prevention**: Break circular dependencies
+    4. **Plugin Architecture**: Load implementations discovered at runtime
+    5. **Environment-Specific Loading**: Different classes for dev/test/prod
+    
+    Why Not Direct Imports:
+    -----------------------
+    Direct imports create tight coupling:
+        from example_project.interface.graphql_service import GraphQLService
+        
+    With ClassImportPath, we can change implementations via configuration:
+        frames_class = ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
+        # Change to: "example_project.interface.frame_service.FrameService"
+    
+    This allows switching implementations without code changes, supporting:
+    - A/B testing different implementations
+    - Environment-specific implementations
+    - Feature flags
+    - Plugin systems
+    
+    Attributes:
+        module_name: Python module path (e.g., 'example_project.interface.graphql_service')
+        class_name: Class name within the module (e.g., 'GraphQLService')
+    
+    Example Usage:
+    --------------
+    >>> path = ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
+    >>> service_class = path.import_class()  # Returns GraphQLService class
+    >>> service_instance = service_class()  # Create instance
+    >>> # Or use __call__ shorthand:
+    >>> service_class = path()  # Same as import_class()
+    """
 
     module_name: str
     class_name: str
@@ -6,7 +73,23 @@
     def __str__(self):
         return f"{self.module_name}.{self.class_name}"
 
-    @classmethod\n    def from_string(cls, fully_qualified_module_name: str):\n        \"\"\"\n        Parse fully qualified class name into ClassImportPath.\n        \n        Splits string like \"module.path.ClassName\" into module_name and class_name.\n        \n        Parameters:\n            fully_qualified_module_name: Dot-separated module path with class name\n        \n        Returns:\n            ClassImportPath: Parsed import path specification\n        \n        Example:\n            >>> ClassImportPath.from_string(\"example_project.interface.graphql_service.GraphQLService\")\n            ClassImportPath(module_name='example_project.interface.graphql_service', class_name='GraphQLService')\n        \"\"\"
+    @classmethod
+    def from_string(cls, fully_qualified_module_name: str):
+        """
+        Parse fully qualified class name into ClassImportPath.
+        
+        Splits string like "module.path.ClassName" into module_name and class_name.
+        
+        Parameters:
+            fully_qualified_module_name: Dot-separated module path with class name
+        
+        Returns:
+            ClassImportPath: Parsed import path specification
+        
+        Example:
+            >>> ClassImportPath.from_string("example_project.interface.graphql_service.GraphQLService")
+            ClassImportPath(module_name='example_project.interface.graphql_service', class_name='GraphQLService')
+        """
         last_dot = fully_qualified_module_name.rfind(".")
 
         if last_dot == -1:
@@ -18,12 +101,25 @@
                 class_name=fully_qualified_module_name[last_dot + 1 :],
             )
 
-    def import_class(self):\n        \"\"\"\n        Dynamically import and return the class.\n        \n        Uses importlib to import the module and getattr to retrieve the class.\n        \n        Returns:\n            type: The imported class (not an instance)\n        \n        Raises:\n            ModuleNotFoundError: If module doesn't exist\n            AttributeError: If class doesn't exist in module\n        \"\"\"
+    def import_class(self):
+        """
+        Dynamically import and return the class.
+        
+        Uses importlib to import the module and getattr to retrieve the class.
+        
+        Returns:
+            type: The imported class (not an instance)
+        
+        Raises:
+            ModuleNotFoundError: If module doesn't exist
+            AttributeError: If class doesn't exist in module
+        """
         module = importlib.import_module(self.module_name)
 
         return getattr(module, self.class_name)
 
-    def __call__(self):\n        \"\"\"Convenience method to call import_class().\"\"\"
+    def __call__(self):
+        """Convenience method to call import_class()."""
         return self.import_class()
 
 

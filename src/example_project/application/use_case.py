@@ -1,4 +1,98 @@
-"""\nUse Case Implementations\n\nThis module defines the use cases for the application. Use cases represent specific\nbusiness operations and orchestrate the flow between domain entities and adapters.\n\nClean Architecture Benefits Demonstrated:\n-----------------------------------------\n1. **Dependency Inversion**: Use cases depend on protocols (abstractions), not concrete\n   implementations. This allows swapping storage backends, API clients, or parsers\n   without changing the use case logic.\n\n2. **Single Responsibility**: Each use case does one thing. DownloadAndStore handles\n   the complete flow of downloading, parsing, and storing data.\n\n3. **Testability**: Use cases can be tested with mock implementations of protocols,\n   enabling fast, isolated unit tests.\n\nUse Case Pattern:\n-----------------\nAll use cases implement the UseCase protocol with an execute() method. This provides\na consistent interface for executing business operations throughout the application.\n\"\""\n\nfrom example_project.adapter.protocols import ApiClass, Parser, Storage\nfrom example_project.composition.context import Context\nfrom typing import Protocol\n\n\nclass UseCase(Protocol):\n    \"\"\"\n    Base protocol for all use cases in the application.\n    \n    The UseCase protocol establishes a consistent interface for executing business\n    operations. This allows use cases to be:\n    - Called uniformly via execute()\n    - Composed and chained together\n    - Wrapped with cross-cutting concerns (logging, monitoring, transactions)\n    \n    The __call__ method provides syntactic sugar, allowing use cases to be invoked\n    like functions: use_case() instead of use_case.execute()\n    \"\"\"\n    def execute(self) -> None: ...\n\n    def __call__(self) -> None:\n        self.execute()\n\n\nclass DownloadAndStore(UseCase):\n    \"\"\"\n    Use case for downloading data from an API, parsing it, and storing the result.\n    \n    This use case demonstrates Clean Architecture's Dependency Inversion Principle:\n    it depends on abstractions (ApiClass, Parser, Storage protocols) rather than\n    concrete implementations. This provides several key benefits:\n    \n    Benefits:\n    ---------\n    1. **Swappable Components**: Change from FrameService to GraphQLService without\n       modifying this class\n    2. **Multiple Storage Options**: Switch between filesystem and Unity Catalog\n       storage by changing the injected dependency\n    3. **Parser Flexibility**: Add JSON→DataFrame or JSON→Domain Entity parsers\n       without touching this use case\n    4. **Testability**: Mock each dependency independently for isolated testing\n    5. **Stability**: This use case should never change due to external system changes\n    \n    Why This Matters:\n    ----------------\n    If we tightly coupled this class to specific implementations (e.g., directly\n    importing GraphQLService), every change to the API or storage system would\n    require modifying this business logic. With dependency injection via protocols,\n    the business logic remains stable and protected from external changes.\n    \n    Parameters:\n    -----------\n    context : Context\n        Application context containing configuration and environment information\n    download_client : ApiClass\n        Protocol implementation for downloading data from external source\n    parser : Parser\n        Protocol implementation for transforming downloaded data\n    storage : Storage\n        Protocol implementation for persisting parsed data\n    \n    Example:\n    --------\n    >>> download_and_store = DownloadAndStore(\n    ...     context=my_context,\n    ...     download_client=GraphQLService(),\n    ...     parser=AsIsParser(),\n    ...     storage=UnityCatalogVolumeStorageService(...)\n    ... )\n    >>> download_and_store.execute()  # Orchestrates the complete flow\n    \"\"\"
+"""
+Use Case Implementations
+
+This module defines the use cases for the application. Use cases represent specific
+business operations and orchestrate the flow between domain entities and adapters.
+
+Clean Architecture Benefits Demonstrated:
+-----------------------------------------
+1. **Dependency Inversion**: Use cases depend on protocols (abstractions), not concrete
+   implementations. This allows swapping storage backends, API clients, or parsers
+   without changing the use case logic.
+
+2. **Single Responsibility**: Each use case does one thing. DownloadAndStore handles
+   the complete flow of downloading, parsing, and storing data.
+
+3. **Testability**: Use cases can be tested with mock implementations of protocols,
+   enabling fast, isolated unit tests.
+
+Use Case Pattern:
+-----------------
+All use cases implement the UseCase protocol with an execute() method. This provides
+a consistent interface for executing business operations throughout the application.
+"""
+
+from example_project.adapter.protocols import ApiClass, Parser, Storage
+from example_project.composition.context import Context
+from typing import Protocol
+
+
+class UseCase(Protocol):
+    """
+    Base protocol for all use cases in the application.
+    
+    The UseCase protocol establishes a consistent interface for executing business
+    operations. This allows use cases to be:
+    - Called uniformly via execute()
+    - Composed and chained together
+    - Wrapped with cross-cutting concerns (logging, monitoring, transactions)
+    
+    The __call__ method provides syntactic sugar, allowing use cases to be invoked
+    like functions: use_case() instead of use_case.execute()
+    """
+    def execute(self) -> None: ...
+
+    def __call__(self) -> None:
+        self.execute()
+
+
+class DownloadAndStore(UseCase):
+    """
+    Use case for downloading data from an API, parsing it, and storing the result.
+    
+    This use case demonstrates Clean Architecture's Dependency Inversion Principle:
+    it depends on abstractions (ApiClass, Parser, Storage protocols) rather than
+    concrete implementations. This provides several key benefits:
+    
+    Benefits:
+    ---------
+    1. **Swappable Components**: Change from FrameService to GraphQLService without
+       modifying this class
+    2. **Multiple Storage Options**: Switch between filesystem and Unity Catalog
+       storage by changing the injected dependency
+    3. **Parser Flexibility**: Add JSON→DataFrame or JSON→Domain Entity parsers
+       without touching this use case
+    4. **Testability**: Mock each dependency independently for isolated testing
+    5. **Stability**: This use case should never change due to external system changes
+    
+    Why This Matters:
+    ----------------
+    If we tightly coupled this class to specific implementations (e.g., directly
+    importing GraphQLService), every change to the API or storage system would
+    require modifying this business logic. With dependency injection via protocols,
+    the business logic remains stable and protected from external changes.
+    
+    Parameters:
+    -----------
+    context : Context
+        Application context containing configuration and environment information
+    download_client : ApiClass
+        Protocol implementation for downloading data from external source
+    parser : Parser
+        Protocol implementation for transforming downloaded data
+    storage : Storage
+        Protocol implementation for persisting parsed data
+    
+    Example:
+    --------
+    >>> download_and_store = DownloadAndStore(
+    ...     context=my_context,
+    ...     download_client=GraphQLService(),
+    ...     parser=AsIsParser(),
+    ...     storage=UnityCatalogVolumeStorageService(...)
+    ... )
+    >>> download_and_store.execute()  # Orchestrates the complete flow
+    """
     def __init__(
         self,
         context: Context,

@@ -1,2 +1,56 @@
-"""\nParser Implementations\n\nParsers transform raw API data into formats suitable for storage or further processing.\nThey implement the Parser protocol, enabling different transformation strategies.\n\"\""\n\n\nclass AsIsParser:\n    \"\"\"\n    Pass-through parser that returns data unchanged.\n    \n    This parser implements the Parser protocol with no transformation logic. It's useful\n    when the API data format is already suitable for storage, or when transformation\n    should happen elsewhere (e.g., in the storage layer or downstream processing).\n    \n    Benefits:\n    ---------\n    1. **Performance**: No transformation overhead\n    2. **Simplicity**: Maintains raw API data structure\n    3. **Debugging**: Easy to inspect original API responses\n    4. **Flexibility**: Defer transformation decisions to later stages\n    \n    When to Use:\n    ------------\n    - API data format matches storage requirements\n    - Want to store raw data for later processing\n    - Testing or debugging API responses\n    - Prototyping before implementing actual transformation logic\n    \n    Alternative Parsers (Examples):\n    -------------------------------\n    - JsonToDomainEntityParser: Map JSON to domain model instances\n    - JsonToDataFrameParser: Convert to pandas DataFrame\n    - DataCleaningParser: Validate and clean data\n    - EnrichmentParser: Add computed fields or external data\n    \n    Example Usage:\n    --------------\n    >>> parser = AsIsParser()\n    >>> raw_data = {\"id\": 1, \"name\": \"frame1\"}\n    >>> parsed = parser.parse(raw_data)\n    >>> assert parsed == raw_data  # No transformation\n    \"\"\"\n    \n    def parse(self, s):\n        \"\"\"\n        Return input data unchanged.\n        \n        Parameters:\n            s: Data in any format from API\n        \n        Returns:\n            Same data structure as input\n        \"\"\"
+"""
+Parser Implementations
+
+Parsers transform raw API data into formats suitable for storage or further processing.
+They implement the Parser protocol, enabling different transformation strategies.
+"""
+
+
+class AsIsParser:
+    """
+    Pass-through parser that returns data unchanged.
+    
+    This parser implements the Parser protocol with no transformation logic. It's useful
+    when the API data format is already suitable for storage, or when transformation
+    should happen elsewhere (e.g., in the storage layer or downstream processing).
+    
+    Benefits:
+    ---------
+    1. **Performance**: No transformation overhead
+    2. **Simplicity**: Maintains raw API data structure
+    3. **Debugging**: Easy to inspect original API responses
+    4. **Flexibility**: Defer transformation decisions to later stages
+    
+    When to Use:
+    ------------
+    - API data format matches storage requirements
+    - Want to store raw data for later processing
+    - Testing or debugging API responses
+    - Prototyping before implementing actual transformation logic
+    
+    Alternative Parsers (Examples):
+    -------------------------------
+    - JsonToDomainEntityParser: Map JSON to domain model instances
+    - JsonToDataFrameParser: Convert to pandas DataFrame
+    - DataCleaningParser: Validate and clean data
+    - EnrichmentParser: Add computed fields or external data
+    
+    Example Usage:
+    --------------
+    >>> parser = AsIsParser()
+    >>> raw_data = {"id": 1, "name": "frame1"}
+    >>> parsed = parser.parse(raw_data)
+    >>> assert parsed == raw_data  # No transformation
+    """
+    
+    def parse(self, s: Any):
+        """
+        Return input data unchanged.
+        
+        Parameters:
+            s: Data in any format from API
+        
+        Returns:
+            Same data structure as input
+        """
         return s
