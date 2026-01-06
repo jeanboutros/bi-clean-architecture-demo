@@ -1,0 +1,33 @@
+[project]
+name = "example-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jean Boutros", email = "jean.boutros@clearchannelint.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+example-project = "example_project:main"
+
+[build-system]
+requires = ["uv_build>=0.8.8,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+example-project = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "example-project",
+    "flake8>=7.3.0",
+    "ruff>=0.14.10",
+]
+
