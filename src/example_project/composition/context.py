@@ -224,14 +224,14 @@ class Context(NamedTuple):
             project_package_name="example_project",
             frames_class=ClassImportPath.from_string(
                 # "example_project.interface.frame_service.FrameService"
-                "example_project.interface.graphql_service.GraphQLService"
+                "example_project.adapter.interface.graphql_service.GraphQLService"
             ),
             frames_parser_class=ClassImportPath.from_string(
-                "example_project.parser.AsIsParser"
+                "example_project.adapter.parser.AsIsParser"
             ),
             storage_class=ClassImportPath.from_string(
                 # "example_project.storage.UnityCatalogVolumeStorageService"
-                "example_project.storage.StorageService"
+                "example_project.adapter.storage.StorageService"
 
             ),
         )
@@ -253,14 +253,14 @@ class Context(NamedTuple):
             project_package_name="example_project",
             frames_class=ClassImportPath.from_string(
                 # "example_project.interface.frame_service.FrameService"
-                "example_project.interface.graphql_service.GraphQLService"
+                "example_project.adapter.interface.graphql_service.GraphQLService"
             ),
             frames_parser_class=ClassImportPath.from_string(
-                "example_project.parser.AsIsParser"
+                "example_project.adapter.parser.AsIsParser"
             ),
             storage_class=ClassImportPath.from_string(
                 # "example_project.storage.UnityCatalogVolumeStorageService"
-                "example_project.storage.StorageService"
+                "example_project.adapter.storage.StorageService"
 
             ),
         )
